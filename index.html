@@ -1079,7 +1079,7 @@ function markOrderDelivered(orderId) {
     { id:7, name:"Suite Men", brand:"Pluto Premium", img:"suite.png", original:3999, discounted:2789, material:"Wool blend", color:"Black", colorHex:"#111111", sizes:["S","M","L"], desc:"Bold", features:"Padded shoulders", stock:"Pre-order", care:"Dry clean", fit:"Tailored" },
     { id:8, name:"Sneakers", brand:"Pluto Sport", img:"shoes1 .png", original:2000, discounted:999, material:"Vegan Leather", color:"White/Gold", colorHex:"#FFFFFF", sizes:["7","8","9","10","11"], desc:"Urban", features:"Memory foam", stock:"In Stock", care:"Wipe", fit:"Standard" },
     { id:9, name:"Cargo Pants", brand:"Pluto Adventure", img:"cargo1.png", original:1890, discounted:899, material:"Vegan Leather", color:"Green", colorHex:"#2b6e3c", sizes:["7","8","9","10","11"], desc:"Urban luxury", features:"Memory foam", stock:"In Stock", care:"Spot clean", fit:"Regular" },
-    { id:10, name:"Baggy Jacket", brand:"Pluto Adventure", img:"jacket2.png", original:1890, discounted:899, material:"Vegan Leather", color:"Green", colorHex:"#2b6e3c", sizes:["8","9","10","11"], desc:"Urban luxury", features:"Memory foam", stock:"In Stock", care:"Spot clean", fit:"Regular" }
+    { id:10, name:"Baggy Jacket", brand:"Pluto Adventure", img:"Jacket2.png", original:1890, discounted:899, material:"Vegan Leather", color:"Green", colorHex:"#2b6e3c", sizes:["8","9","10","11"], desc:"Urban luxury", features:"Memory foam", stock:"In Stock", care:"Spot clean", fit:"Regular" }
   ];
   const perfumes = [ { id:11, name:"Chocolate Oud", brand:"Pluto Fragrance", img:"perfume1.png", original:3499, discounted:1299, material:"Extrait", color:"Amber", colorHex:"#c07c3e", sizes:["50ml","100ml"], desc:"Deep woody", features:"12h lasting", stock:"In Stock", care:"Cool place", fit:"Unisex" }, { id:12, name:"Mystic Bloom", brand:"Pluto Fragrance", img:"perfume2.png", original:2699, discounted:1989, material:"EDP", color:"Pink", colorHex:"#ffb7c5", sizes:["50ml","100ml"], desc:"Floral", features:"Day wear", stock:"In Stock", care:"No sun", fit:"Women" }, { id:13, name:"Santal Royal", brand:"Pluto Fragrance", img:"perfume3.png", original:2999, discounted:1499, material:"Parfum", color:"Brown", colorHex:"#8b5a2b", sizes:["50ml","100ml"], desc:"Sandalwood", features:"Unisex", stock:"Limited", care:"Upright", fit:"Unisex" }
  ];
@@ -1109,7 +1109,72 @@ function markOrderDelivered(orderId) {
     grid.querySelectorAll(".buyNowBtn").forEach(btn => btn.onclick = () => { const prod = [...products, ...perfumes, ...jewellery].find(p=>p.id==btn.dataset.id); showBuyNowModal([prod], prod.discounted); });
     if(withCargo) { const card = grid.querySelector('.product-card[data-product-id="9"]'); if(card) { card.querySelector('.color-switch-green').onclick = (e) => { e.stopPropagation(); updateCargoCard("green"); }; card.querySelector('.color-switch-yellow').onclick = (e) => { e.stopPropagation(); updateCargoCard("yellow"); }; } updateCargoCard("green"); }
   }
-  function renderAllProducts() { renderProductGrid("productGrid", products, true); renderProductGrid("perfumeGrid", perfumes, false); renderProductGrid("jewelleryGrid", jewellery, false); }
+  
+  // ========== SEARCH FUNCTIONALITY (FIXED) ==========
+  let currentSearchTerm = '';
+  function filterProducts() {
+    const searchInput = document.getElementById('collectionSearchInput');
+    if (!searchInput) return;
+    
+    currentSearchTerm = searchInput.value.trim().toLowerCase();
+    const clearBtn = document.getElementById('clearSearchBtn');
+    if (clearBtn) {
+      clearBtn.style.display = currentSearchTerm ? 'block' : 'none';
+    }
+    
+    // Filter each category
+    const filteredProducts = products.filter(p => 
+      p.name.toLowerCase().includes(currentSearchTerm) || 
+      p.brand.toLowerCase().includes(currentSearchTerm)
+    );
+    const filteredPerfumes = perfumes.filter(p => 
+      p.name.toLowerCase().includes(currentSearchTerm) || 
+      p.brand.toLowerCase().includes(currentSearchTerm)
+    );
+    const filteredJewellery = jewellery.filter(p => 
+      p.name.toLowerCase().includes(currentSearchTerm) || 
+      p.brand.toLowerCase().includes(currentSearchTerm)
+    );
+    
+    // Render grids with filtered arrays
+    renderProductGrid("productGrid", filteredProducts, true);
+    renderProductGrid("perfumeGrid", filteredPerfumes, false);
+    renderProductGrid("jewelleryGrid", filteredJewellery, false);
+    
+    // Update result count message
+    const totalResults = filteredProducts.length + filteredPerfumes.length + filteredJewellery.length;
+    const resultCountDiv = document.getElementById('searchResultCount');
+    if (resultCountDiv) {
+      if (currentSearchTerm && totalResults === 0) {
+        resultCountDiv.innerHTML = '✨ No products found. Try another keyword.';
+        resultCountDiv.style.color = '#b45309';
+      } else if (currentSearchTerm) {
+        resultCountDiv.innerHTML = `🔍 Found ${totalResults} product${totalResults !== 1 ? 's' : ''} for “${currentSearchTerm}”`;
+        resultCountDiv.style.color = 'var(--brown-soft)';
+      } else {
+        resultCountDiv.innerHTML = '';
+      }
+    }
+  }
+  
+  // Modified renderAllProducts to support search reset
+  function renderAllProducts() {
+    // Reset search input if exists
+    const searchInput = document.getElementById('collectionSearchInput');
+    if (searchInput) {
+      searchInput.value = '';
+      currentSearchTerm = '';
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.style.display = 'none';
+      const resultDiv = document.getElementById('searchResultCount');
+      if (resultDiv) resultDiv.innerHTML = '';
+    }
+    // Render full unfiltered grids
+    renderProductGrid("productGrid", products, true);
+    renderProductGrid("perfumeGrid", perfumes, false);
+    renderProductGrid("jewelleryGrid", jewellery, false);
+  }
+  
   function renderFeatures() { document.getElementById("featuresGrid").innerHTML = [{icon:"fa-gem",title:"Premium Quality",desc:"Finest fabrics"},{icon:"fa-palette",title:"Trendy Designs",desc:"Global runways"},{icon:"fa-rocket",title:"Fast Shipping",desc:"Worldwide"},{icon:"fa-smile",title:"24/7 Support",desc:"Personalized"},{icon:"fa-lock",title:"Secure Shopping",desc:"Encrypted"},{icon:"fa-crown",title:"Exclusive Access",desc:"Early access"}].map(f=>`<div class="feature-card"><i class="fas ${f.icon}" style="font-size:1.8rem; color:var(--gold);"></i><h3>${f.title}</h3><p>${f.desc}</p></div>`).join(""); }
   function renderMemberships() { document.getElementById("membershipGrid").innerHTML = [{name:"Basic",price:299,features:["Member discounts","Early notifications","Basic support","Shopping rewards"],icon:"fa-star"},{name:"Premium",price:499,features:["Everything in Basic","Priority support","Early access","Premium discounts","Exclusive previews"],icon:"fa-crown",premium:true},{name:"Exclusive",price:999,features:["Everything in Premium","VIP shopping access","Maximum discounts","Exclusive launches","Limited collections"],icon:"fa-gem"}].map(m=>`<div class="membership-card ${m.premium?'premium':''}"><i class="fas ${m.icon} card-icon"></i><h3>${m.name}</h3><div class="price">₹${m.price}<small>/year</small></div><ul>${m.features.map(f=>`<li><i class="fas fa-check gold-text"></i> ${f}</li>`).join("")}</ul><button class="btn-gold" onclick="showMembershipUpgrade()">Subscribe →</button></div>`).join(""); }
   window.showMembershipUpgrade = function() { if (!currentUser) { sessionStorage.setItem('upgradeIntent', 'true'); showLogin(); return; } const plans = [ { tier:'BASIC', name:'Basic', price:299, features:['Member discounts','Early notifications','Basic support','Shopping rewards'], icon:'fa-star' }, { tier:'PREMIUM', name:'Premium', price:499, features:['Everything in Basic','Priority support','Early access','Premium discounts','Exclusive previews'], icon:'fa-crown', premium:true }, { tier:'EXCLUSIVE', name:'Exclusive', price:999, features:['Everything in Premium','VIP shopping access','Maximum discounts','Exclusive launches','Limited collections'], icon:'fa-gem' } ]; document.getElementById('subscriptionModalBody').innerHTML = plans.map(p => `<div class="plan-card ${p.premium ? 'premium-card' : ''}"><i class="fas ${p.icon}" style="font-size:2rem; color:var(--gold); margin-bottom:0.5rem; display:inline-block;"></i><h3 style="font-size:1.5rem; margin:0.5rem 0;">${p.name}</h3><div class="price">₹${p.price}<small>/year</small></div><ul style="list-style:none; margin:1rem 0;">${p.features.map(f=>`<li><i class="fas fa-check gold-text"></i> ${f}</li>`).join('')}</ul><button class="btn-gold" onclick="initiateSubscriptionPayment('${p.tier}',${p.price})">Subscribe Now →</button></div>`).join(''); document.getElementById('subscriptionModal').style.display = 'flex'; };
@@ -1138,7 +1203,30 @@ function markOrderDelivered(orderId) {
   document.getElementById("scrollTop").onclick = () => window.scrollTo({top:0, behavior:"smooth"});
   document.getElementById("mobileMenuBtn").onclick = () => document.getElementById("navLinks").classList.toggle("show-mobile");
 
-  window.addEventListener("load", () => { setTimeout(() => document.getElementById("loader").style.display = "none", 400); renderFeatures(); renderMemberships(); renderAllProducts(); updateCartUI(); updateUIBasedOnAuth(); });
+  window.addEventListener("load", () => { 
+    setTimeout(() => document.getElementById("loader").style.display = "none", 400); 
+    renderFeatures(); 
+    renderMemberships(); 
+    renderAllProducts(); 
+    updateCartUI(); 
+    updateUIBasedOnAuth();
+    
+    // Attach search events
+    const searchInput = document.getElementById('collectionSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', filterProducts);
+    }
+    const clearBtn = document.getElementById('clearSearchBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        if (searchInput) {
+          searchInput.value = '';
+          filterProducts(); // triggers reset
+          searchInput.focus();
+        }
+      });
+    }
+  });
 </script>
 </body>
 </html>
