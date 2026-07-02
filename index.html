@@ -379,6 +379,20 @@
             font-weight: bold;
             display: inline-block;
         }
+        .stock-badge {
+            background: #eab308;
+            color: #1e1b1a;
+            padding: 3px 10px;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 4px;
+        }
+        .stock-badge.out-of-stock {
+            background: #dc3545;
+            color: white;
+        }
         .product-info h3 {
             font-size: 1.2rem;
             margin: 8px 0 4px;
@@ -426,6 +440,15 @@
         .btn-sm:hover {
             background: var(--gold);
             color: white;
+        }
+        .btn-sm.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .btn-sm.disabled:hover {
+            background: none;
+            color: inherit;
         }
         .color-switch-group {
             margin: 8px 0 4px;
@@ -2203,58 +2226,67 @@
 
     <script>
         // ================================================================
-        //  DATA LOADER — reads from localStorage (synced with admin dashboard)
+        //  DATA LAYER — reads from localStorage (synced with admin dashboard)
         // ================================================================
 
         // DEFAULT DATA (fallback if localStorage is empty)
         const DEFAULT_PRODUCTS = [
-            { id: 1, name: "Linen silk shirt", brand: "Pluto Atelier", img: "assets/shirt1.png", original: 1999,
-                discounted: 899, material: "Linen-Silk", color: "Ivory", colorHex: "#f5ecd9", sizes: ["S", "M", "L", "XL"],
-                desc: "Airy luxury", features: "Breathable", stock: "In Stock", care: "Gentle wash", fit: "Relaxed" },
-            { id: 2, name: "Boston Shirt", brand: "Pluto Studio", img: "assets/shirt2.png", original: 1399, discounted: 899,
-                material: "Wool blend", color: "Charcoal", colorHex: "#36454F", sizes: ["28", "30", "32", "34", "36", "38"],
-                desc: "Sharp fit", features: "Stretch", stock: "Limited", care: "Dry clean", fit: "Slim" },
-            { id: 3, name: "Leather Loafers", brand: "Pluto Luxe", img: "assets/shoes2.png", original: 2555,
-                discounted: 1199, material: "Genuine Leather", color: "Tan", colorHex: "#d2b48c",
+            { id: 1, name: "Linen silk shirt", brand: "Pluto Atelier", category: "Clothing", img: "assets/shirt1.png",
+                original: 1999, discounted: 899, material: "Linen-Silk", color: "Ivory", colorHex: "#f5ecd9",
+                sizes: ["S", "M", "L", "XL"], desc: "Airy luxury", features: "Breathable", stock: "In Stock",
+                care: "Gentle wash", fit: "Relaxed" },
+            { id: 2, name: "Boston Shirt", brand: "Pluto Studio", category: "Clothing", img: "assets/shirt2.png",
+                original: 1399, discounted: 899, material: "Wool blend", color: "Charcoal", colorHex: "#36454F",
+                sizes: ["28", "30", "32", "34", "36", "38"], desc: "Sharp fit", features: "Stretch", stock: "Limited",
+                care: "Dry clean", fit: "Slim" },
+            { id: 3, name: "Leather Loafers", brand: "Pluto Luxe", category: "Clothing", img: "assets/shoes2.png",
+                original: 2555, discounted: 1199, material: "Genuine Leather", color: "Tan", colorHex: "#d2b48c",
                 sizes: ["6", "7", "8", "9", "10", "11", "12"], desc: "Handcrafted", features: "Cushioned",
                 stock: "In Stock", care: "Polish", fit: "True" },
-            { id: 4, name: "Bulkey Shirt", brand: "Pluto Heritage", img: "assets/shirt3.png", original: 2599,
-                discounted: 1189, material: "Cashmere", color: "Camel", colorHex: "#c19a6b", sizes: ["S", "M", "L", "XL",
-                    "XXL"
-                ], desc: "Ultra-soft", features: "Warmth", stock: "In Stock", care: "Hand wash", fit: "Oversized" },
-            { id: 5, name: "Denim jacket", brand: "Pluto Denim", img: "assets/jacket1.png", original: 1799,
-                discounted: 989, material: "Organic Cotton", color: "Indigo", colorHex: "#4b0082",
+            { id: 4, name: "Bulkey Shirt", brand: "Pluto Heritage", category: "Clothing", img: "assets/shirt3.png",
+                original: 2599, discounted: 1189, material: "Cashmere", color: "Camel", colorHex: "#c19a6b",
+                sizes: ["S", "M", "L", "XL", "XXL"], desc: "Ultra-soft", features: "Warmth", stock: "In Stock",
+                care: "Hand wash", fit: "Oversized" },
+            { id: 5, name: "Denim jacket", brand: "Pluto Denim", category: "Clothing", img: "assets/jacket1.png",
+                original: 1799, discounted: 989, material: "Organic Cotton", color: "Indigo", colorHex: "#4b0082",
                 sizes: ["S", "M", "L", "XL", "XXXL"], desc: "Classic", features: "Eco-friendly", stock: "In Stock",
                 care: "Machine wash", fit: "Regular" },
-            { id: 6, name: "Satin midi dress", brand: "Pluto Femme", img: "assets/femaildress1.png", original: 2499,
-                discounted: 1369, material: "Satin", color: "Champagne", colorHex: "#f7e7ce", sizes: ["XS", "S", "M", "L"],
-                desc: "Elegant", features: "Adjustable straps", stock: "In Stock", care: "Dry clean", fit: "Flowy" },
-            { id: 7, name: "Suite Men", brand: "Pluto Premium", img: "assets/suite.png", original: 3999, discounted: 2789,
-                material: "Wool blend", color: "Black", colorHex: "#111111", sizes: ["S", "M", "L"], desc: "Bold",
-                features: "Padded shoulders", stock: "Pre-order", care: "Dry clean", fit: "Tailored" },
-            { id: 8, name: "Sneakers", brand: "Pluto Sport", img: "assets/shoes1 .png", original: 2000, discounted: 999,
-                material: "Vegan Leather", color: "White/Gold", colorHex: "#FFFFFF", sizes: ["7", "8", "9", "10", "11"],
-                desc: "Urban", features: "Memory foam", stock: "In Stock", care: "Wipe", fit: "Standard" },
-            { id: 9, name: "Cargo Pants", brand: "Pluto Adventure", img: "assets/cargo1.png", original: 1890,
-                discounted: 899, material: "Vegan Leather", color: "Green", colorHex: "#2b6e3c",
+            { id: 6, name: "Satin midi dress", brand: "Pluto Femme", category: "Clothing", img: "assets/femaildress1.png",
+                original: 2499, discounted: 1369, material: "Satin", color: "Champagne", colorHex: "#f7e7ce",
+                sizes: ["XS", "S", "M", "L"], desc: "Elegant", features: "Adjustable straps", stock: "In Stock",
+                care: "Dry clean", fit: "Flowy" },
+            { id: 7, name: "Suite Men", brand: "Pluto Premium", category: "Clothing", img: "assets/suite.png",
+                original: 3999, discounted: 2789, material: "Wool blend", color: "Black", colorHex: "#111111",
+                sizes: ["S", "M", "L"], desc: "Bold", features: "Padded shoulders", stock: "Pre-order",
+                care: "Dry clean", fit: "Tailored" },
+            { id: 8, name: "Sneakers", brand: "Pluto Sport", category: "Clothing", img: "assets/shoes1 .png",
+                original: 2000, discounted: 999, material: "Vegan Leather", color: "White/Gold", colorHex: "#FFFFFF",
+                sizes: ["7", "8", "9", "10", "11"], desc: "Urban", features: "Memory foam", stock: "In Stock",
+                care: "Wipe", fit: "Standard" },
+            { id: 9, name: "Cargo Pants", brand: "Pluto Adventure", category: "Clothing", img: "assets/cargo1.png",
+                original: 1890, discounted: 899, material: "Vegan Leather", color: "Green", colorHex: "#2b6e3c",
                 sizes: ["7", "8", "9", "10", "11"], desc: "Urban luxury", features: "Memory foam", stock: "In Stock",
                 care: "Spot clean", fit: "Regular" },
-            { id: 10, name: "Baggy Jacket", brand: "Pluto Adventure", img: "assets/jacket2.png", original: 1890,
-                discounted: 899, material: "Vegan Leather", color: "Green", colorHex: "#2b6e3c",
+            { id: 10, name: "Baggy Jacket", brand: "Pluto Adventure", category: "Clothing", img: "assets/jacket2.png",
+                original: 1890, discounted: 899, material: "Vegan Leather", color: "Green", colorHex: "#2b6e3c",
                 sizes: ["8", "9", "10", "11"], desc: "Urban luxury", features: "Memory foam", stock: "In Stock",
                 care: "Spot clean", fit: "Regular" },
-            { id: 11, name: "Chocolate Oud", brand: "Pluto Fragrance", img: "assets/perfume1.png", original: 3499,
-                discounted: 1299, material: "Extrait", color: "Amber", colorHex: "#c07c3e", sizes: ["50ml", "100ml"],
-                desc: "Deep woody", features: "12h lasting", stock: "In Stock", care: "Cool place", fit: "Unisex" },
-            { id: 12, name: "Mystic Bloom", brand: "Pluto Fragrance", img: "assets/perfume2.png", original: 2699,
-                discounted: 1989, material: "EDP", color: "Pink", colorHex: "#ffb7c5", sizes: ["50ml", "100ml"],
-                desc: "Floral", features: "Day wear", stock: "In Stock", care: "No sun", fit: "Women" },
-            { id: 13, name: "Santal Royal", brand: "Pluto Fragrance", img: "assets/perfume3.png", original: 2999,
-                discounted: 1499, material: "Parfum", color: "Brown", colorHex: "#8b5a2b", sizes: ["50ml", "100ml"],
-                desc: "Sandalwood", features: "Unisex", stock: "Limited", care: "Upright", fit: "Unisex" },
-            { id: 14, name: "Gold Chain", brand: "Pluto Jewels", img: "assets/jewellery1.png", original: 4999,
-                discounted: 3109, material: "Gold Plated", color: "Gold", colorHex: "#ffd700", sizes: ["One Size"],
-                desc: "Classic", features: "Hypoallergenic", stock: "In Stock", care: "Avoid water", fit: "One" }
+            { id: 11, name: "Chocolate Oud", brand: "Pluto Fragrance", category: "Perfume", img: "assets/perfume1.png",
+                original: 3499, discounted: 1299, material: "Extrait", color: "Amber", colorHex: "#c07c3e",
+                sizes: ["50ml", "100ml"], desc: "Deep woody", features: "12h lasting", stock: "In Stock",
+                care: "Cool place", fit: "Unisex" },
+            { id: 12, name: "Mystic Bloom", brand: "Pluto Fragrance", category: "Perfume", img: "assets/perfume2.png",
+                original: 2699, discounted: 1989, material: "EDP", color: "Pink", colorHex: "#ffb7c5",
+                sizes: ["50ml", "100ml"], desc: "Floral", features: "Day wear", stock: "In Stock",
+                care: "No sun", fit: "Women" },
+            { id: 13, name: "Santal Royal", brand: "Pluto Fragrance", category: "Perfume", img: "assets/perfume3.png",
+                original: 2999, discounted: 1499, material: "Parfum", color: "Brown", colorHex: "#8b5a2b",
+                sizes: ["50ml", "100ml"], desc: "Sandalwood", features: "Unisex", stock: "Limited",
+                care: "Upright", fit: "Unisex" },
+            { id: 14, name: "Gold Chain", brand: "Pluto Jewels", category: "Jewellery", img: "assets/jewellery1.png",
+                original: 4999, discounted: 3109, material: "Gold Plated", color: "Gold", colorHex: "#ffd700",
+                sizes: ["One Size"], desc: "Classic", features: "Hypoallergenic", stock: "In Stock",
+                care: "Avoid water", fit: "One" }
         ];
 
         const DEFAULT_BANNERS = [
@@ -2263,6 +2295,12 @@
         ];
 
         const DEFAULT_LOGO = "assets/logo1.png";
+
+        const DEFAULT_MEMBERSHIPS = [
+            { name: "Basic", price: 299, features: ["Member discounts", "Early notifications", "Basic support", "Shopping rewards"], icon: "fa-star", premium: false },
+            { name: "Premium", price: 499, features: ["Everything in Basic", "Priority support", "Early access", "Premium discounts", "Exclusive previews"], icon: "fa-crown", premium: true },
+            { name: "Exclusive", price: 999, features: ["Everything in Premium", "VIP shopping access", "Maximum discounts", "Exclusive launches", "Limited collections"], icon: "fa-gem", premium: false }
+        ];
 
         // ---- Data accessors ----
         function getProducts() {
@@ -2292,16 +2330,24 @@
             return data;
         }
 
+        function getMemberships() {
+            let data = localStorage.getItem('pluto_memberships');
+            if (!data) {
+                localStorage.setItem('pluto_memberships', JSON.stringify(DEFAULT_MEMBERSHIPS));
+                return DEFAULT_MEMBERSHIPS;
+            }
+            try { return JSON.parse(data); } catch (e) { return DEFAULT_MEMBERSHIPS; }
+        }
+
         // ---- Update all logo instances ----
         function updateAllLogos() {
             const logo = getLogo();
             document.getElementById('mainLogo').src = logo;
             document.getElementById('showcaseLogo').src = logo;
-            // Also update any other logo instances if needed
         }
 
         // ================================================================
-        //  GLOBAL STATE & HELPERS (unchanged)
+        //  GLOBAL STATE & HELPERS
         // ================================================================
         let users = JSON.parse(localStorage.getItem('pluto_users')) || [];
         let currentUser = JSON.parse(localStorage.getItem('pluto_currentUser')) || null;
@@ -2324,7 +2370,7 @@
             document.getElementById('forgotModal').style.display = 'flex'; }
 
         // ================================================================
-        //  REGISTER / LOGIN (unchanged)
+        //  REGISTER / LOGIN
         // ================================================================
         document.getElementById('doRegisterBtn')?.addEventListener('click', () => {
             const name = document.getElementById('regName').value.trim();
@@ -2379,7 +2425,7 @@
             alert('Logged out'); }
 
         // ================================================================
-        //  UPDATE UI AFTER AUTH (unchanged)
+        //  UPDATE UI AFTER AUTH
         // ================================================================
         function updateUIBasedOnAuth() {
             const userMenu = document.getElementById('userMenu');
@@ -2395,7 +2441,7 @@
         }
 
         // ================================================================
-        //  DASHBOARD (unchanged - user dashboard)
+        //  USER DASHBOARD (unchanged)
         // ================================================================
         function openDashboard() {
             if (!currentUser) { showLogin(); return; }
@@ -2585,7 +2631,7 @@
         }
 
         // ================================================================
-        //  CHECKOUT & BUY NOW (unchanged)
+        //  CHECKOUT & BUY NOW
         // ================================================================
         let pendingCheckout = null;
 
@@ -2638,16 +2684,92 @@
         }
 
         // ================================================================
-        //  PRODUCT RENDERING — now uses getProducts() from localStorage
+        //  PRODUCT RENDERING — with member-only stock badges
         // ================================================================
 
-        // We keep the cargoVariants for the special color-switch on product id 9
         const cargoVariants = { green: { img: "assets/cargo1.png", color: "Green", hex: "#2b6e3c" },
             yellow: { img: "assets/cargo2.png", color: "Yellow", hex: "#eab308" } };
 
-        // Instead of hardcoded arrays, we'll use getProducts() and filter by category
-        function getProductsByCategory(category) {
-            return getProducts().filter(p => p.category === category);
+        function isMember() {
+            return currentUser && currentUser.membershipTier && currentUser.membershipTier !== 'FREE';
+        }
+
+        function renderProductGrid(gridId, arr, withCargo = false) {
+            const grid = document.getElementById(gridId);
+            if (!grid) return;
+            if (!arr || arr.length === 0) {
+                grid.innerHTML =
+                    `<div style="grid-column:1/-1; text-align:center; color:#b8aa99; padding:2rem; background:white; border-radius:1.5rem;">No products in this collection yet.</div>`;
+                return;
+            }
+
+            const member = isMember();
+
+            grid.innerHTML = arr.map(p => {
+                let extra = '';
+                let stockBadge = '';
+
+                // Stock badge — only for members
+                if (member && p.stock && p.stock !== 'In Stock') {
+                    const badgeClass = p.stock === 'Out of Stock' ? 'stock-badge out-of-stock' : 'stock-badge';
+                    stockBadge = `<span class="${badgeClass}">${p.stock}</span>`;
+                }
+
+                const isAvailable = (p.stock === 'In Stock') || member;
+                const disabledClass = isAvailable ? '' : 'disabled';
+                const disabledAttr = isAvailable ? '' : 'disabled';
+
+                if (withCargo && p.id === 9) {
+                    extra = `<div class="color-switch-group"><button class="color-switch-btn color-switch-green">🟢 Green</button><button class="color-switch-btn color-switch-yellow">🟡 Yellow</button></div>`;
+                }
+
+                const btnText = isAvailable ? 'Add to Cart' : '<i class="fas fa-lock"></i> Members Only';
+
+                return `<div class="product-card" data-product-id="${p.id}">
+                            <img class="product-img" src="${p.img}">
+                            <div class="product-info">
+                                <span class="discount-badge">-${Math.round((1-p.discounted/p.original)*100)}%</span>
+                                ${stockBadge}
+                                <h3>${p.name}</h3>
+                                <p style="color:#7a5a48;">${p.brand}</p>
+                                <span class="old-price">₹${p.original}</span>
+                                <span class="new-price">₹${p.discounted}</span>
+                                ${extra}
+                                <div>
+                                    <button class="btn-sm addCartBtn ${disabledClass}" data-id='${JSON.stringify(p)}' ${disabledAttr}>${btnText}</button>
+                                    <button class="btn-sm viewDetailBtn ${disabledClass}" data-id='${p.id}' ${disabledAttr}>${isAvailable ? 'Details' : '🔒'}</button>
+                                    <button class="btn-sm buyNowBtn ${disabledClass}" data-id='${p.id}' ${disabledAttr}>${isAvailable ? 'Buy Now' : '🔒'}</button>
+                                </div>
+                            </div>
+                        </div>`;
+            }).join("");
+
+            // Attach events only for enabled buttons
+            grid.querySelectorAll(".addCartBtn:not(.disabled)").forEach(btn => btn.onclick = () => addToCart(JSON.parse(btn
+                .dataset.id), null, 1));
+            grid.querySelectorAll(".viewDetailBtn:not(.disabled)").forEach(btn => btn.onclick = () => {
+                const allProducts = getProducts();
+                const prod = allProducts.find(p => p.id == btn.dataset.id);
+                if (prod) showProductDetail(prod);
+            });
+            grid.querySelectorAll(".buyNowBtn:not(.disabled)").forEach(btn => btn.onclick = () => {
+                const allProducts = getProducts();
+                const prod = allProducts.find(p => p.id == btn.dataset.id);
+                if (prod) showBuyNowModal([prod], prod.discounted);
+            });
+
+            if (withCargo) {
+                const card = grid.querySelector('.product-card[data-product-id="9"]');
+                if (card) {
+                    const greenBtn = card.querySelector('.color-switch-green');
+                    const yellowBtn = card.querySelector('.color-switch-yellow');
+                    if (greenBtn) greenBtn.onclick = (e) => { e.stopPropagation();
+                        updateCargoCard("green"); };
+                    if (yellowBtn) yellowBtn.onclick = (e) => { e.stopPropagation();
+                        updateCargoCard("yellow"); };
+                }
+                updateCargoCard("green");
+            }
         }
 
         function showProductDetail(p) {
@@ -2677,47 +2799,15 @@
                 close(); };
         }
 
-        function updateCargoCard(v) { const card = document.querySelector('.product-card[data-product-id="9"]'); if (card) { card
-                    .querySelector('.product-img').src = cargoVariants[v].img; const allProducts = getProducts(); const prod =
-                    allProducts.find(p => p.id === 9); if (prod) { prod.img = cargoVariants[v].img;
+        function updateCargoCard(v) {
+            const card = document.querySelector('.product-card[data-product-id="9"]');
+            if (card) {
+                card.querySelector('.product-img').src = cargoVariants[v].img;
+                const allProducts = getProducts();
+                const prod = allProducts.find(p => p.id === 9);
+                if (prod) { prod.img = cargoVariants[v].img;
                     prod.color = cargoVariants[v].color;
-                    prod.colorHex = cargoVariants[v].hex; } } }
-
-        function renderProductGrid(gridId, arr, withCargo = false) {
-            const grid = document.getElementById(gridId);
-            if (!grid) return;
-            if (!arr || arr.length === 0) {
-                grid.innerHTML =
-                    `<div style="grid-column:1/-1; text-align:center; color:#b8aa99; padding:2rem; background:white; border-radius:1.5rem;">No products in this collection yet.</div>`;
-                return;
-            }
-            grid.innerHTML = arr.map(p => {
-                let extra = '';
-                if (withCargo && p.id === 9) extra =
-                    `<div class="color-switch-group"><button class="color-switch-btn color-switch-green">🟢 Green</button><button class="color-switch-btn color-switch-yellow">🟡 Yellow</button></div>`;
-                return `<div class="product-card" data-product-id="${p.id}"><img class="product-img" src="${p.img}"><div class="product-info"><span class="discount-badge">-${Math.round((1-p.discounted/p.original)*100)}%</span><h3>${p.name}</h3><p style="color:#7a5a48;">${p.brand}</p><span class="old-price">₹${p.original}</span><span class="new-price">₹${p.discounted}</span>${extra}<div><button class="btn-sm addCartBtn" data-id='${JSON.stringify(p)}'>Add to Cart</button><button class="btn-sm viewDetailBtn" data-id='${p.id}'>Details</button><button class="btn-sm buyNowBtn" data-id='${p.id}'>Buy Now</button></div></div></div>`;
-            }).join("");
-            grid.querySelectorAll(".addCartBtn").forEach(btn => btn.onclick = () => addToCart(JSON.parse(btn.dataset.id),
-                null, 1));
-            grid.querySelectorAll(".viewDetailBtn").forEach(btn => btn.onclick = () => {
-                const allProducts = getProducts();
-                const prod = allProducts.find(p => p.id == btn.dataset.id);
-                if (prod) showProductDetail(prod);
-            });
-            grid.querySelectorAll(".buyNowBtn").forEach(btn => btn.onclick = () => {
-                const allProducts = getProducts();
-                const prod = allProducts.find(p => p.id == btn.dataset.id);
-                if (prod) showBuyNowModal([prod], prod.discounted);
-            });
-            if (withCargo) {
-                const card = grid.querySelector('.product-card[data-product-id="9"]');
-                if (card) {
-                    card.querySelector('.color-switch-green').onclick = (e) => { e.stopPropagation();
-                        updateCargoCard("green"); };
-                    card.querySelector('.color-switch-yellow').onclick = (e) => { e.stopPropagation();
-                        updateCargoCard("yellow"); };
-                }
-                updateCargoCard("green");
+                    prod.colorHex = cargoVariants[v].hex; }
             }
         }
 
@@ -2743,7 +2833,6 @@
                 (p.category && p.category.toLowerCase().includes(currentSearchTerm))
             );
 
-            // Separate by category for display
             const clothing = filteredProducts.filter(p => p.category === 'Clothing');
             const perfumes = filteredProducts.filter(p => p.category === 'Perfume');
             const jewellery = filteredProducts.filter(p => p.category === 'Jewellery');
@@ -2816,7 +2905,6 @@
                 `<div class="hero-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`
             ).join('');
 
-            // Re-assign slide and dot references
             const slides = document.querySelectorAll('.hero-slide');
             const dots = document.querySelectorAll('.hero-dot');
 
@@ -2847,20 +2935,18 @@
                 }
             }
 
-            // Store functions globally for restart
             window._carouselShowSlide = showSlide;
             window._carouselStart = startCarousel;
 
             startCarousel();
 
-            // Clean up old interval on page unload
             window.addEventListener('beforeunload', () => {
                 if (carouselInterval) clearInterval(carouselInterval);
             });
         }
 
         // ================================================================
-        //  FEATURES, MEMBERSHIPS, CART (unchanged)
+        //  FEATURES, MEMBERSHIPS, CART
         // ================================================================
         function renderFeatures() {
             document.getElementById("featuresGrid").innerHTML = [
@@ -2876,41 +2962,30 @@
         }
 
         function renderMemberships() {
-            document.getElementById("membershipGrid").innerHTML = [
-                { name: "Basic", price: 299,
-                    features: ["Member discounts", "Early notifications", "Basic support", "Shopping rewards"],
-                    icon: "fa-star" },
-                { name: "Premium", price: 499,
-                    features: ["Everything in Basic", "Priority support", "Early access", "Premium discounts",
-                        "Exclusive previews"
-                    ], icon: "fa-crown", premium: true },
-                { name: "Exclusive", price: 999,
-                    features: ["Everything in Premium", "VIP shopping access", "Maximum discounts",
-                        "Exclusive launches", "Limited collections"
-                    ], icon: "fa-gem" }
-            ].map(m =>
-                `<div class="membership-card ${m.premium?'premium':''}"><i class="fas ${m.icon} card-icon"></i><h3>${m.name}</h3><div class="price">₹${m.price}<small>/year</small></div><ul>${m.features.map(f=>`<li><i class="fas fa-check gold-text"></i> ${f}</li>`).join("")}</ul><button class="btn-gold" onclick="showMembershipUpgrade()">Subscribe →</button></div>`
+            const plans = getMemberships();
+            document.getElementById("membershipGrid").innerHTML = plans.map(m =>
+                `<div class="membership-card ${m.premium ? 'premium' : ''}">
+                        <i class="fas ${m.icon} card-icon"></i>
+                        <h3>${m.name}</h3>
+                        <div class="price">₹${m.price}<small>/year</small></div>
+                        <ul>${m.features.map(f=>`<li><i class="fas fa-check gold-text"></i> ${f}</li>`).join("")}</ul>
+                        <button class="btn-gold" onclick="showMembershipUpgrade()">Subscribe →</button>
+                    </div>`
             ).join("");
         }
 
         window.showMembershipUpgrade = function() {
             if (!currentUser) { sessionStorage.setItem('upgradeIntent', 'true');
                 showLogin(); return; }
-            const plans = [
-                { tier: 'BASIC', name: 'Basic', price: 299,
-                    features: ['Member discounts', 'Early notifications', 'Basic support', 'Shopping rewards'],
-                    icon: 'fa-star' },
-                { tier: 'PREMIUM', name: 'Premium', price: 499,
-                    features: ['Everything in Basic', 'Priority support', 'Early access', 'Premium discounts',
-                        'Exclusive previews'
-                    ], icon: 'fa-crown', premium: true },
-                { tier: 'EXCLUSIVE', name: 'Exclusive', price: 999,
-                    features: ['Everything in Premium', 'VIP shopping access', 'Maximum discounts',
-                        'Exclusive launches', 'Limited collections'
-                    ], icon: 'fa-gem' }
-            ];
+            const plans = getMemberships();
             document.getElementById('subscriptionModalBody').innerHTML = plans.map(p =>
-                `<div class="plan-card ${p.premium ? 'premium-card' : ''}"><i class="fas ${p.icon}" style="font-size:2rem; color:var(--gold); margin-bottom:0.5rem; display:inline-block;"></i><h3 style="font-size:1.5rem; margin:0.5rem 0;">${p.name}</h3><div class="price">₹${p.price}<small>/year</small></div><ul style="list-style:none; margin:1rem 0;">${p.features.map(f=>`<li><i class="fas fa-check gold-text"></i> ${f}</li>`).join('')}</ul><button class="btn-gold" onclick="initiateSubscriptionPayment('${p.tier}',${p.price})">Subscribe Now →</button></div>`
+                `<div class="plan-card ${p.premium ? 'premium-card' : ''}">
+                        <i class="fas ${p.icon}" style="font-size:2rem; color:var(--gold); margin-bottom:0.5rem; display:inline-block;"></i>
+                        <h3 style="font-size:1.5rem; margin:0.5rem 0;">${p.name}</h3>
+                        <div class="price">₹${p.price}<small>/year</small></div>
+                        <ul style="list-style:none; margin:1rem 0;">${p.features.map(f=>`<li><i class="fas fa-check gold-text"></i> ${f}</li>`).join('')}</ul>
+                        <button class="btn-gold" onclick="initiateSubscriptionPayment('${p.name}',${p.price})">Subscribe Now →</button>
+                    </div>`
             ).join('');
             document.getElementById('subscriptionModal').style.display = 'flex';
         };
@@ -3045,20 +3120,14 @@
         window.addEventListener("load", () => {
             setTimeout(() => document.getElementById("loader").style.display = "none", 400);
 
-            // Update logos from localStorage
             updateAllLogos();
-
-            // Initialize carousel with banners from localStorage
             initCarousel();
-
-            // Render features, memberships, products
             renderFeatures();
             renderMemberships();
             renderAllProducts();
             updateCartUI();
             updateUIBasedOnAuth();
 
-            // Search events
             const searchInput = document.getElementById('collectionSearchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', filterProducts);
@@ -3074,19 +3143,16 @@
                 });
             }
 
-            // Listen for storage changes from other tabs (admin dashboard)
             window.addEventListener('storage', (e) => {
-                if (e.key === 'pluto_products' || e.key === 'pluto_banners' || e.key === 'pluto_logo') {
-                    // Reload data
-                    if (e.key === 'pluto_products') {
-                        renderAllProducts();
-                    }
-                    if (e.key === 'pluto_banners') {
-                        initCarousel();
-                    }
-                    if (e.key === 'pluto_logo') {
-                        updateAllLogos();
-                    }
+                if (e.key === 'pluto_products') { renderAllProducts(); }
+                if (e.key === 'pluto_banners') { initCarousel(); }
+                if (e.key === 'pluto_logo') { updateAllLogos(); }
+                if (e.key === 'pluto_memberships') { renderMemberships(); }
+                if (e.key === 'pluto_users' || e.key === 'pluto_currentUser') {
+                    // Re-check membership status
+                    currentUser = JSON.parse(localStorage.getItem('pluto_currentUser')) || null;
+                    users = JSON.parse(localStorage.getItem('pluto_users')) || [];
+                    updateUIBasedOnAuth();
                 }
             });
         });
