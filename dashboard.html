@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pluto · Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        /* ---------- RESET & VARIABLES ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --gold: #c6a43b;
+            --gold-light: #e3c771;
+            --gold-dark: #9e7e2c;
+            --brown-deep: #4a3525;
+            --brown-soft: #7a5a48;
+            --cream: #fff9f0;
+            --sidebar: 260px;
+            --radius: 1.25rem;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f6f0e9;
+            color: #1e1b1a;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ---------- LOGIN SCREEN ---------- */
+        #loginScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #1e1b1a 0%, #2c241e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.6s ease;
+        }
+        #loginScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .login-box {
+            background: rgba(255, 250, 240, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 2.5rem;
+            padding: 2.5rem 2.8rem;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 1px solid rgba(198, 164, 59, 0.3);
+        }
+        .login-box .logo {
+            max-width: 140px;
+            margin: 0 auto 1rem;
+            display: block;
+        }
+        .login-box h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: var(--brown-deep);
+            margin-bottom: 0.2rem;
+        }
+        .login-box p {
+            color: var(--brown-soft);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+        .login-box .input-group {
+            margin-bottom: 1rem;
+            position: relative;
+            text-align: left;
+        }
+        .login-box .input-group i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gold-dark);
+        }
+        .login-box .input-group input {
+            width: 100%;
+            padding: 12px 16px 12px 46px;
+            border: 1.5px solid #e2d4c2;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            background: white;
+            transition: 0.2s;
+        }
+        .login-box .input-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(198, 164, 59, 0.15);
+        }
+        .login-box .btn-login {
+            background: var(--gold);
+            border: none;
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.25s;
+            color: #1e1b1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 0.5rem;
+        }
+        .login-box .btn-login:hover {
+            background: var(--gold-dark);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .login-box .error-msg {
+            color: #b02a37;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* ---------- SIDEBAR ---------- */
+        .sidebar {
+            width: var(--sidebar);
+            background: linear-gradient(180deg, #1e1b1a 0%, #2c241e 100%);
+            color: #d4c9bc;
+            padding: 1.5rem 0;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid rgba(198, 164, 59, 0.2);
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+        .sidebar .brand {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid rgba(198, 164, 59, 0.12);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar .brand img {
+            height: 40px;
+            width: auto;
+            border-radius: 8px;
+        }
+        .sidebar .brand h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+        }
+        .sidebar .nav {
+            padding: 0.8rem;
+            flex: 1;
+        }
+        .sidebar .nav .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #7a6a5a;
+            padding: 0.8rem 1rem 0.4rem;
+            font-weight: 600;
+        }
+        .sidebar .nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            color: #b8aa99;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        .sidebar .nav a i {
+            width: 22px;
+            color: var(--gold-dark);
+            transition: 0.2s;
+        }
+        .sidebar .nav a:hover,
+        .sidebar .nav a.active {
+            background: rgba(198, 164, 59, 0.1);
+            color: #f0e8de;
+        }
+        .sidebar .nav a:hover i,
+        .sidebar .nav a.active i {
+            color: var(--gold);
+        }
+        .sidebar .nav a.active {
+            border-right: 3px solid var(--gold);
+        }
+        .sidebar .footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(198, 164, 59, 0.08);
+            font-size: 0.75rem;
+            color: #6a5f54;
+            text-align: center;
+        }
+        .sidebar .footer a {
+            color: var(--gold-light);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sidebar .footer a:hover {
+            color: var(--gold);
+        }
+
+        /* ---------- MAIN ---------- */
+        .main {
+            flex: 1;
+            padding: 1.5rem 2rem 3rem;
+            min-width: 0;
+        }
+
+        /* ---------- TOP BAR ---------- */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(198, 164, 59, 0.12);
+            margin-bottom: 1.5rem;
+        }
+        .topbar h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            color: var(--brown-deep);
+        }
+        .topbar .user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 0.2rem 0.2rem 0.2rem 1rem;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+        }
+        .topbar .user .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e1b1a;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .topbar .user .logout {
+            background: none;
+            border: none;
+            color: #b8aa99;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 30px;
+            transition: 0.2s;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .topbar .user .logout:hover {
+            background: #f5ede2;
+            color: var(--gold-dark);
+        }
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--brown-deep);
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 10px;
+        }
+        .hamburger:hover {
+            background: #f0e8de;
+        }
+
+        /* ---------- STATS ---------- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.2rem 1.5rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--gold);
+            transition: 0.25s;
+        }
+        .stat:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+        }
+        .stat .num {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--brown-deep);
+            font-family: 'Cormorant Garamond', serif;
+        }
+        .stat .label {
+            font-size: 0.75rem;
+            color: #8a7c6e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        .stat .icon {
+            float: right;
+            font-size: 1.4rem;
+            color: var(--gold-light);
+            opacity: 0.5;
+        }
+
+        /* ---------- PANELS ---------- */
+        .panel {
+            display: none;
+            animation: fade 0.3s ease;
+        }
+        .panel.active {
+            display: block;
+        }
+        @keyframes fade {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .panel-header h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: var(--brown-deep);
+        }
+        .btn {
+            background: var(--gold);
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #1e1b1a;
+        }
+        .btn:hover {
+            background: var(--gold-dark);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #b02a37;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #e2d4c2;
+        }
+        .btn-outline:hover {
+            background: #f5ede2;
+            border-color: var(--brown-soft);
+            transform: none;
+            color: inherit;
+        }
+        .btn-sm {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+            border-radius: 30px;
+        }
+
+        /* ---------- TABLE ---------- */
+        .table-wrap {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        table thead {
+            background: #faf5ed;
+        }
+        table th {
+            text-align: left;
+            padding: 0.8rem 1rem;
+            font-weight: 600;
+            color: var(--brown-soft);
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 0.6px;
+        }
+        table td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid #f0e8de;
+            vertical-align: middle;
+        }
+        table tr:hover td {
+            background: #fcf8f2;
+        }
+        .thumb {
+            width: 44px;
+            height: 44px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #e8ddc3;
+        }
+        .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .actions button {
+            border: none;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .actions .edit {
+            background: #fef6ec;
+            color: var(--gold-dark);
+        }
+        .actions .edit:hover {
+            background: var(--gold);
+            color: white;
+        }
+        .actions .del {
+            background: #fde8e8;
+            color: #b02a37;
+        }
+        .actions .del:hover {
+            background: #dc3545;
+            color: white;
+        }
+        .empty {
+            text-align: center;
+            color: #b8aa99;
+            padding: 2.5rem 1rem;
+            font-style: italic;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* ---------- BANNER GRID ---------- */
+        .banner-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.2rem;
+        }
+        .banner-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: 0.25s;
+        }
+        .banner-card:hover {
+            border-color: var(--gold-light);
+            transform: translateY(-4px);
+        }
+        .banner-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+        .banner-card .info {
+            padding: 0.7rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+        }
+        .banner-card .info .index {
+            font-size: 0.7rem;
+            color: #b8aa99;
+        }
+        .banner-card .info .actions {
+            gap: 4px;
+        }
+        .banner-card .info .actions .active-badge {
+            background: #d4edda;
+            color: #155724;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        /* ---------- LOGO PREVIEW ---------- */
+        .logo-area {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            max-width: 400px;
+        }
+        .logo-area .current {
+            max-width: 200px;
+            max-height: 120px;
+            object-fit: contain;
+            margin: 1rem auto;
+            display: block;
+            border-radius: 12px;
+            background: #faf5ed;
+            padding: 0.5rem;
+            border: 1px solid #e8ddc3;
+        }
+
+        /* ---------- MODAL ---------- */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .modal.open {
+            display: flex;
+        }
+        .modal .box {
+            background: white;
+            max-width: 780px;
+            width: 100%;
+            border-radius: 2rem;
+            padding: 2rem;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .modal .box .head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #f0e8de;
+        }
+        .modal .box .head h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: var(--brown-deep);
+        }
+        .modal .box .head .close {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #b8aa99;
+            transition: 0.2s;
+        }
+        .modal .box .head .close:hover {
+            color: var(--brown-deep);
+            transform: rotate(90deg);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .form-grid .full {
+            grid-column: span 2;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .form-group label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--brown-soft);
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 14px;
+            border: 1.5px solid #e2d4c2;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            transition: 0.2s;
+            width: 100%;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(198, 164, 59, 0.12);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .file-zone {
+            position: relative;
+            border: 2px dashed #e2d4c2;
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #fcf8f2;
+        }
+        .file-zone:hover {
+            border-color: var(--gold);
+            background: #faf5ed;
+        }
+        .file-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .file-zone .preview {
+            max-width: 100%;
+            max-height: 140px;
+            border-radius: 10px;
+            margin-top: 8px;
+            object-fit: contain;
+            background: white;
+        }
+        .file-zone .placeholder {
+            color: #b8aa99;
+            font-size: 0.85rem;
+        }
+        .file-zone .placeholder i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 6px;
+            color: var(--gold-light);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f0e8de;
+            flex-wrap: wrap;
+        }
+        .form-actions .submit {
+            background: var(--gold);
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #1e1b1a;
+        }
+        .form-actions .submit:hover {
+            background: var(--gold-dark);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .form-actions .cancel {
+            background: none;
+            border: 1.5px solid #e2d4c2;
+            padding: 0.7rem 2rem;
+            border-radius: 50px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            color: var(--brown-soft);
+        }
+        .form-actions .cancel:hover {
+            background: #f5ede2;
+        }
+
+        /* ---------- TOAST ---------- */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1e1b1a;
+            color: #f0e8de;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            z-index: 300;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid var(--gold);
+            pointer-events: none;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast i {
+            color: var(--gold);
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 820px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-grid .full {
+                grid-column: span 1;
+            }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                width: 280px;
+                height: 100vh;
+                z-index: 150;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main {
+                padding: 1rem;
+            }
+            .hamburger {
+                display: block;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .banner-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .topbar h1 {
+                font-size: 1.3rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            .banner-grid {
+                grid-template-columns: 1fr;
+            }
+            .topbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .topbar .user {
+                justify-content: space-between;
+            }
+            .modal .box {
+                padding: 1.2rem;
+                margin: 0.5rem;
+            }
+        }
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 4px;
+        }
+        .gold {
+            color: var(--gold);
+        }
+
+        /* ---------- ORDER STATUS BADGE OVERRIDES ---------- */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-badge.pending {
+            background: #fed7aa;
+            color: #9b4a00;
+        }
+        .status-badge.delivered {
+            background: #c8e6d9;
+            color: #1e5e3a;
+        }
+        .status-badge.processing {
+            background: #bfdbfe;
+            color: #1e40af;
+        }
+        .status-badge.cancelled {
+            background: #fde8e8;
+            color: #b02a37;
+        }
+
+        /* Order item tags */
+        .order-items-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .order-items-list .item-tag {
+            background: #f5ede2;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: var(--brown-soft);
+            display: inline-block;
+        }
+        .order-items-list .item-tag .qty-badge {
+            background: var(--gold);
+            color: #1e1b1a;
+            border-radius: 50%;
+            padding: 0 6px;
+            font-size: 0.6rem;
+            margin-left: 4px;
+            font-weight: 700;
+        }
+
+        /* Admin badge for products */
+        .category-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            background: #f5ede2;
+            color: var(--brown-soft);
+        }
+        .category-badge.clothing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .category-badge.perfume {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+        .category-badge.jewellery {
+            background: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== LOGIN SCREEN ========== -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <img src="assets/logo1.png" alt="Pluto" class="logo" id="loginLogo" />
+            <h2>Admin Access</h2>
+            <p>Manage your Pluto Collections store</p>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="loginEmail" placeholder="Email" value="admin@pluto.com" />
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="loginPassword" placeholder="Password" value="admin123" />
+            </div>
+            <div class="error-msg" id="loginError">Invalid email or password.</div>
+            <button class="btn-login" id="loginBtn"><i class="fas fa-arrow-right-to-bracket"></i> Sign In</button>
+        </div>
+    </div>
+
+    <!-- ========== ADMIN APP ========== -->
+    <div class="admin-wrapper" id="adminApp" style="display:none; width:100%;">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <img src="assets/logo1.png" alt="Pluto" id="sideLogo" />
+                <h2>Pluto Admin</h2>
+            </div>
+            <nav class="nav">
+                <div class="label">Main</div>
+                <a class="active" data-panel="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a data-panel="products"><i class="fas fa-box-open"></i> Products</a>
+                <a data-panel="banners"><i class="fas fa-images"></i> Hero Banners</a>
+                <a data-panel="logo"><i class="fas fa-crown"></i> Logo &amp; Brand</a>
+                <div class="label" style="margin-top:1.5rem;">Store</div>
+                <a data-panel="orders"><i class="fas fa-receipt"></i> Orders</a>
+                <a data-panel="users"><i class="fas fa-users"></i> Users</a>
+            </nav>
+            <div class="footer">
+                <a href="#" onclick="goStore(); return false;"><i class="fas fa-arrow-left"></i> Back to Store</a>
+                <div style="margin-top:6px; font-size:0.7rem;">v2.1 · Local Storage</div>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+
+            <!-- TOPBAR -->
+            <div class="topbar">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+                    <h1 id="panelTitle">Dashboard</h1>
+                </div>
+                <div class="user">
+                    <span id="adminName">Admin</span>
+                    <div class="avatar" id="adminAvatar">A</div>
+                    <button class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+
+            <!-- ===== DASHBOARD ===== -->
+            <div class="panel active" id="panel-dashboard">
+                <div class="stats" id="statsGrid">
+                    <div class="stat"><i class="fas fa-box stat-icon"></i><div class="num" id="statProducts">0</div><div class="label">Products</div></div>
+                    <div class="stat"><i class="fas fa-images stat-icon"></i><div class="num" id="statBanners">0</div><div class="label">Banners</div></div>
+                    <div class="stat"><i class="fas fa-shopping-bag stat-icon"></i><div class="num" id="statOrders">0</div><div class="label">Orders</div></div>
+                    <div class="stat"><i class="fas fa-users stat-icon"></i><div class="num" id="statUsers">0</div><div class="label">Users</div></div>
+                </div>
+                <div style="background:white; border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow);">
+                    <h3 style="font-family:'Cormorant Garamond',serif; margin-bottom:0.5rem; color:var(--brown-deep);">
+                        <i class="fas fa-info-circle gold"></i> Quick Actions
+                    </h3>
+                    <p style="color:#8a7c6e; font-size:0.9rem; margin-bottom:1rem;">
+                        Manage products, banners, logo, orders and users. All changes sync instantly with your live store via local storage.
+                    </p>
+                    <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+                        <button class="btn" onclick="switchPanel('products')"><i class="fas fa-plus"></i> Add Product</button>
+                        <button class="btn" onclick="switchPanel('banners')"><i class="fas fa-plus"></i> Add Banner</button>
+                        <button class="btn" onclick="switchPanel('logo')"><i class="fas fa-upload"></i> Change Logo</button>
+                        <button class="btn btn-outline" onclick="switchPanel('orders'); refreshOrders();"><i class="fas fa-sync"></i> View Orders</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PRODUCTS ===== -->
+            <div class="panel" id="panel-products">
+                <div class="panel-header">
+                    <h2><i class="fas fa-box-open gold"></i> Product Management</h2>
+                    <button class="btn" onclick="openProductModal()"><i class="fas fa-plus"></i> Add Product</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Image</th><th>Name</th><th>Brand</th><th>Category</th><th>Price</th><th>Disc.</th><th>Stock</th><th>Actions</th></tr></thead>
+                        <tbody id="productTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== BANNERS ===== -->
+            <div class="panel" id="panel-banners">
+                <div class="panel-header">
+                    <h2><i class="fas fa-images gold"></i> Hero Banners</h2>
+                    <button class="btn" onclick="openBannerModal()"><i class="fas fa-plus"></i> Add Banner</button>
+                </div>
+                <div class="banner-grid" id="bannerGrid"></div>
+                <p style="margin-top:1rem; color:#8a7c6e; font-size:0.8rem;">
+                    <i class="fas fa-info-circle"></i> Banners appear in the hero carousel. The first banner is shown first.
+                </p>
+            </div>
+
+            <!-- ===== LOGO ===== -->
+            <div class="panel" id="panel-logo">
+                <div class="panel-header">
+                    <h2><i class="fas fa-crown gold"></i> Logo &amp; Brand</h2>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:2rem;">
+                    <div class="logo-area">
+                        <h4 style="font-family:'Cormorant Garamond',serif; color:var(--brown-deep);">Current Logo</h4>
+                        <img src="assets/logo1.png" alt="Logo" class="current" id="currentLogo" />
+                        <p style="font-size:0.75rem; color:#b8aa99;">Appears in navbar, sidebar &amp; footer.</p>
+                    </div>
+                    <div style="flex:1; min-width:260px; background:white; border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow);">
+                        <h4 style="font-family:'Cormorant Garamond',serif; color:var(--brown-deep); margin-bottom:1rem;">
+                            <i class="fas fa-upload gold"></i> Upload New Logo
+                        </h4>
+                        <div class="form-group">
+                            <label>Logo Image (PNG, JPG, SVG)</label>
+                            <div class="file-zone">
+                                <input type="file" id="logoFile" accept="image/png,image/jpeg,image/svg+xml" />
+                                <div class="placeholder">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>Click or drag to upload</span>
+                                </div>
+                                <img id="logoPreview" class="preview" style="display:none;" />
+                            </div>
+                        </div>
+                        <button class="btn" onclick="uploadLogo()" style="margin-top:1rem; width:100%; justify-content:center;">
+                            <i class="fas fa-save"></i> Save Logo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ORDERS ===== -->
+            <div class="panel" id="panel-orders">
+                <div class="panel-header">
+                    <h2><i class="fas fa-receipt gold"></i> Orders Management</h2>
+                    <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                        <button class="btn" onclick="refreshOrders()"><i class="fas fa-sync"></i> Refresh</button>
+                        <button class="btn btn-outline" onclick="createTestOrder()"><i class="fas fa-plus"></i> Create Test Order</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+                        <tbody id="orderTable"></tbody>
+                    </table>
+                </div>
+                <p style="margin-top:0.8rem; color:#8a7c6e; font-size:0.75rem;">
+                    <i class="fas fa-info-circle"></i> Orders are stored in <code>pluto_orders</code> in localStorage. Click "Refresh" to reload.
+                </p>
+            </div>
+
+            <!-- ===== USERS ===== -->
+            <div class="panel" id="panel-users">
+                <div class="panel-header">
+                    <h2><i class="fas fa-users gold"></i> Users</h2>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Membership</th><th>Points</th><th>Joined</th></tr></thead>
+                        <tbody id="userTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ========== PRODUCT MODAL ========== -->
+    <div class="modal" id="productModal">
+        <div class="box">
+            <div class="head">
+                <h3 id="productModalTitle">Add Product</h3>
+                <button class="close" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="productForm" onsubmit="saveProduct(event)">
+                <input type="hidden" id="editProductId" />
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Product Image</label>
+                        <div class="file-zone">
+                            <input type="file" id="productImage" accept="image/*" />
+                            <div class="placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Upload product image</span>
+                            </div>
+                            <img id="productImagePreview" class="preview" style="display:none;" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Product Name *</label>
+                        <input type="text" id="pName" placeholder="Linen Silk Shirt" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Brand *</label>
+                        <input type="text" id="pBrand" placeholder="Pluto Atelier" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select id="pCategory" required>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Perfume">Perfume</option>
+                            <option value="Jewellery">Jewellery</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Original Price (₹) *</label>
+                        <input type="number" id="pOriginal" placeholder="1999" required min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>Discounted Price (₹) *</label>
+                        <input type="number" id="pDiscounted" placeholder="899" required min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>Material</label>
+                        <input type="text" id="pMaterial" placeholder="Linen-Silk" />
+                    </div>
+                    <div class="form-group">
+                        <label>Color</label>
+                        <input type="text" id="pColor" placeholder="Ivory" />
+                    </div>
+                    <div class="form-group">
+                        <label>Color Hex</label>
+                        <input type="text" id="pColorHex" placeholder="#f5ecd9" />
+                    </div>
+                    <div class="form-group">
+                        <label>Sizes (comma separated)</label>
+                        <input type="text" id="pSizes" placeholder="S, M, L, XL" />
+                    </div>
+                    <div class="form-group">
+                        <label>Stock</label>
+                        <select id="pStock">
+                            <option value="In Stock">In Stock</option>
+                            <option value="Limited">Limited</option>
+                            <option value="Pre-order">Pre-order</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="pDesc" placeholder="Short description" />
+                    </div>
+                    <div class="form-group">
+                        <label>Features</label>
+                        <input type="text" id="pFeatures" placeholder="Breathable, Stretch" />
+                    </div>
+                    <div class="form-group">
+                        <label>Care</label>
+                        <input type="text" id="pCare" placeholder="Gentle wash" />
+                    </div>
+                    <div class="form-group">
+                        <label>Fit</label>
+                        <input type="text" id="pFit" placeholder="Relaxed, Slim" />
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit"><i class="fas fa-save"></i> Save Product</button>
+                    <button type="button" class="cancel" onclick="closeProductModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== BANNER MODAL ========== -->
+    <div class="modal" id="bannerModal">
+        <div class="box">
+            <div class="head">
+                <h3 id="bannerModalTitle">Add Hero Banner</h3>
+                <button class="close" onclick="closeBannerModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="bannerForm" onsubmit="saveBanner(event)">
+                <input type="hidden" id="editBannerIndex" />
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label>Banner Image *</label>
+                    <div class="file-zone">
+                        <input type="file" id="bannerImage" accept="image/*" required />
+                        <div class="placeholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Upload banner (1920×1080 recommended)</span>
+                        </div>
+                        <img id="bannerImagePreview" class="preview" style="display:none;" />
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit"><i class="fas fa-save"></i> Save Banner</button>
+                    <button type="button" class="cancel" onclick="closeBannerModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== TOAST ========== -->
+    <div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg">Done</span></div>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+        // ================================================================
+        //  DATA LAYER — ALL PRODUCTS FROM THE MAIN STORE (index2.html)
+        //  Includes: 10 Clothing + 3 Perfume + 1 Jewellery = 14 Products
+        // ================================================================
+
+        const DEFAULT_PRODUCTS = [
+            // ---------- CLOTHING (10 items) ----------
+            { id: 1, name: "Linen silk shirt", brand: "Pluto Atelier", category: "Clothing", img: "assets/shirt1.png",
+                original: 1999, discounted: 899, material: "Linen-Silk", color: "Ivory", colorHex: "#f5ecd9",
+                sizes: ["S", "M", "L", "XL"], desc: "Airy luxury", features: "Breathable", stock: "In Stock",
+                care: "Gentle wash", fit: "Relaxed" },
+            { id: 2, name: "Boston Shirt", brand: "Pluto Studio", category: "Clothing", img: "assets/shirt2.png",
+                original: 1399, discounted: 899, material: "Wool blend", color: "Charcoal", colorHex: "#36454F",
+                sizes: ["28", "30", "32", "34", "36", "38"], desc: "Sharp fit", features: "Stretch", stock: "Limited",
+                care: "Dry clean", fit: "Slim" },
+            { id: 3, name: "Leather Loafers", brand: "Pluto Luxe", category: "Clothing", img: "assets/shoes2.png",
+                original: 2555, discounted: 1199, material: "Genuine Leather", color: "Tan", colorHex: "#d2b48c",
+                sizes: ["6", "7", "8", "9", "10", "11", "12"], desc: "Handcrafted", features: "Cushioned",
+                stock: "In Stock", care: "Polish", fit: "True" },
+            { id: 4, name: "Bulkey Shirt", brand: "Pluto Heritage", category: "Clothing", img: "assets/shirt3.png",
+                original: 2599, discounted: 1189, material: "Cashmere", color: "Camel", colorHex: "#c19a6b",
+                sizes: ["S", "M", "L", "XL", "XXL"], desc: "Ultra-soft", features: "Warmth", stock: "In Stock",
+                care: "Hand wash", fit: "Oversized" },
+            { id: 5, name: "Denim jacket", brand: "Pluto Denim", category: "Clothing", img: "assets/jacket1.png",
+                original: 1799, discounted: 989, material: "Organic Cotton", color: "Indigo", colorHex: "#4b0082",
+                sizes: ["S", "M", "L", "XL", "XXXL"], desc: "Classic", features: "Eco-friendly", stock: "In Stock",
+                care: "Machine wash", fit: "Regular" },
+            { id: 6, name: "Satin midi dress", brand: "Pluto Femme", category: "Clothing", img: "assets/femaildress1.png",
+                original: 2499, discounted: 1369, material: "Satin", color: "Champagne", colorHex: "#f7e7ce",
+                sizes: ["XS", "S", "M", "L"], desc: "Elegant", features: "Adjustable straps", stock: "In Stock",
+                care: "Dry clean", fit: "Flowy" },
+            { id: 7, name: "Suite Men", brand: "Pluto Premium", category: "Clothing", img: "assets/suite.png",
+                original: 3999, discounted: 2789, material: "Wool blend", color: "Black", colorHex: "#111111",
+                sizes: ["S", "M", "L"], desc: "Bold", features: "Padded shoulders", stock: "Pre-order",
+                care: "Dry clean", fit: "Tailored" },
+            { id: 8, name: "Sneakers", brand: "Pluto Sport", category: "Clothing", img: "assets/shoes1 .png",
+                original: 2000, discounted: 999, material: "Vegan Leather", color: "White/Gold", colorHex: "#FFFFFF",
+                sizes: ["7", "8", "9", "10", "11"], desc: "Urban", features: "Memory foam", stock: "In Stock",
+                care: "Wipe", fit: "Standard" },
+            { id: 9, name: "Cargo Pants", brand: "Pluto Adventure", category: "Clothing", img: "assets/cargo1.png",
+                original: 1890, discounted: 899, material: "Vegan Leather", color: "Green", colorHex: "#2b6e3c",
+                sizes: ["7", "8", "9", "10", "11"], desc: "Urban luxury", features: "Memory foam", stock: "In Stock",
+                care: "Spot clean", fit: "Regular" },
+            { id: 10, name: "Baggy Jacket", brand: "Pluto Adventure", category: "Clothing", img: "assets/jacket2.png",
+                original: 1890, discounted: 899, material: "Vegan Leather", color: "Green", colorHex: "#2b6e3c",
+                sizes: ["8", "9", "10", "11"], desc: "Urban luxury", features: "Memory foam", stock: "In Stock",
+                care: "Spot clean", fit: "Regular" },
+
+            // ---------- PERFUME (3 items) ----------
+            { id: 11, name: "Chocolate Oud", brand: "Pluto Fragrance", category: "Perfume", img: "assets/perfume1.png",
+                original: 3499, discounted: 1299, material: "Extrait", color: "Amber", colorHex: "#c07c3e",
+                sizes: ["50ml", "100ml"], desc: "Deep woody", features: "12h lasting", stock: "In Stock",
+                care: "Cool place", fit: "Unisex" },
+            { id: 12, name: "Mystic Bloom", brand: "Pluto Fragrance", category: "Perfume", img: "assets/perfume2.png",
+                original: 2699, discounted: 1989, material: "EDP", color: "Pink", colorHex: "#ffb7c5",
+                sizes: ["50ml", "100ml"], desc: "Floral", features: "Day wear", stock: "In Stock",
+                care: "No sun", fit: "Women" },
+            { id: 13, name: "Santal Royal", brand: "Pluto Fragrance", category: "Perfume", img: "assets/perfume3.png",
+                original: 2999, discounted: 1499, material: "Parfum", color: "Brown", colorHex: "#8b5a2b",
+                sizes: ["50ml", "100ml"], desc: "Sandalwood", features: "Unisex", stock: "Limited",
+                care: "Upright", fit: "Unisex" },
+
+            // ---------- JEWELLERY (1 item) ----------
+            { id: 14, name: "Gold Chain", brand: "Pluto Jewels", category: "Jewellery", img: "assets/jewellery1.png",
+                original: 4999, discounted: 3109, material: "Gold Plated", color: "Gold", colorHex: "#ffd700",
+                sizes: ["One Size"], desc: "Classic", features: "Hypoallergenic", stock: "In Stock",
+                care: "Avoid water", fit: "One" }
+        ];
+
+        const DEFAULT_BANNERS = [
+            { img: "assets/banner11.png" },
+            { img: "assets/banner2.png" }
+        ];
+
+        const DEFAULT_LOGO = "assets/logo1.png";
+
+        // ---- Data accessors ----
+        function getProducts() {
+            let data = localStorage.getItem('pluto_products');
+            if (!data) {
+                localStorage.setItem('pluto_products', JSON.stringify(DEFAULT_PRODUCTS));
+                return DEFAULT_PRODUCTS;
+            }
+            try { return JSON.parse(data); } catch (e) { return DEFAULT_PRODUCTS; }
+        }
+
+        function setProducts(p) { localStorage.setItem('pluto_products', JSON.stringify(p)); }
+
+        function getBanners() {
+            let data = localStorage.getItem('pluto_banners');
+            if (!data) {
+                localStorage.setItem('pluto_banners', JSON.stringify(DEFAULT_BANNERS));
+                return DEFAULT_BANNERS;
+            }
+            try { return JSON.parse(data); } catch (e) { return DEFAULT_BANNERS; }
+        }
+
+        function setBanners(b) { localStorage.setItem('pluto_banners', JSON.stringify(b)); }
+
+        function getLogo() {
+            let data = localStorage.getItem('pluto_logo');
+            if (!data) {
+                localStorage.setItem('pluto_logo', DEFAULT_LOGO);
+                return DEFAULT_LOGO;
+            }
+            return data;
+        }
+
+        function setLogo(l) { localStorage.setItem('pluto_logo', l); }
+
+        // ================================================================
+        //  ORDERS
+        // ================================================================
+        function getOrders() {
+            let data = localStorage.getItem('pluto_orders');
+            if (!data) return [];
+            try {
+                const parsed = JSON.parse(data);
+                if (!Array.isArray(parsed)) return [];
+                return parsed;
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function setOrders(orders) {
+            if (!Array.isArray(orders)) orders = [];
+            localStorage.setItem('pluto_orders', JSON.stringify(orders));
+        }
+
+        function getUsers() {
+            let data = localStorage.getItem('pluto_users');
+            if (!data) return [];
+            try { return JSON.parse(data); } catch (e) { return []; }
+        }
+
+        // ================================================================
+        //  TOAST
+        // ================================================================
+        let toastTimer;
+
+        function toast(msg, icon = 'fa-check-circle') {
+            const el = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            el.querySelector('i').className = `fas ${icon}`;
+            el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+        }
+
+        // ================================================================
+        //  NAVIGATION
+        // ================================================================
+        const panelNames = {
+            dashboard: 'Dashboard',
+            products: 'Products',
+            banners: 'Hero Banners',
+            logo: 'Logo & Brand',
+            orders: 'Orders',
+            users: 'Users'
+        };
+
+        function switchPanel(id) {
+            document.querySelectorAll('.sidebar .nav a').forEach(a => a.classList.remove('active'));
+            const link = document.querySelector(`.sidebar .nav a[data-panel="${id}"]`);
+            if (link) link.classList.add('active');
+
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            const panel = document.getElementById(`panel-${id}`);
+            if (panel) panel.classList.add('active');
+
+            document.getElementById('panelTitle').textContent = panelNames[id] || 'Dashboard';
+
+            if (id === 'products') renderProducts();
+            if (id === 'banners') renderBanners();
+            if (id === 'orders') renderOrders();
+            if (id === 'users') renderUsers();
+            if (id === 'dashboard') updateStats();
+            if (id === 'logo') updateLogo();
+
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        document.querySelectorAll('.sidebar .nav a').forEach(a => {
+            a.addEventListener('click', () => {
+                const panel = a.dataset.panel;
+                if (panel) switchPanel(panel);
+            });
+        });
+
+        document.getElementById('hamburger').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburger');
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
+
+        // ================================================================
+        //  STATS
+        // ================================================================
+        function updateStats() {
+            document.getElementById('statProducts').textContent = getProducts().length;
+            document.getElementById('statBanners').textContent = getBanners().length;
+            document.getElementById('statOrders').textContent = getOrders().length;
+            document.getElementById('statUsers').textContent = getUsers().length;
+        }
+
+        // ================================================================
+        //  PRODUCTS
+        // ================================================================
+        function renderProducts() {
+            const products = getProducts();
+            const tbody = document.getElementById('productTable');
+            if (!products.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="empty">No products yet. Click "Add Product".</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = products.map((p, i) => {
+                const catClass = (p.category || 'Clothing').toLowerCase();
+                return `
+                        <tr>
+                            <td><img src="${p.img || 'assets/placeholder.png'}" class="thumb" onerror="this.src='assets/placeholder.png'" /></td>
+                            <td><strong>${p.name}</strong></td>
+                            <td>${p.brand || '-'}</td>
+                            <td><span class="category-badge ${catClass}">${p.category || 'Clothing'}</span></td>
+                            <td>₹${p.original || 0}</td>
+                            <td>₹${p.discounted || 0}</td>
+                            <td><span class="badge ${p.stock === 'In Stock' ? 'badge-success' : p.stock === 'Limited' ? 'badge-warning' : 'badge-danger'}">${p.stock || 'In Stock'}</span></td>
+                            <td><div class="actions">
+                                <button class="edit" onclick="editProduct(${i})"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="del" onclick="deleteProduct(${i})"><i class="fas fa-trash"></i> Del</button>
+                            </div></td>
+                        </tr>
+                    `;
+            }).join('');
+        }
+
+        function openProductModal(data = null) {
+            const modal = document.getElementById('productModal');
+            document.getElementById('productModalTitle').textContent = data ? 'Edit Product' : 'Add Product';
+            document.getElementById('editProductId').value = data ? data._idx : '';
+
+            if (data) {
+                document.getElementById('pName').value = data.name || '';
+                document.getElementById('pBrand').value = data.brand || '';
+                document.getElementById('pCategory').value = data.category || 'Clothing';
+                document.getElementById('pOriginal').value = data.original || '';
+                document.getElementById('pDiscounted').value = data.discounted || '';
+                document.getElementById('pMaterial').value = data.material || '';
+                document.getElementById('pColor').value = data.color || '';
+                document.getElementById('pColorHex').value = data.colorHex || '';
+                document.getElementById('pSizes').value = (data.sizes || []).join(', ');
+                document.getElementById('pStock').value = data.stock || 'In Stock';
+                document.getElementById('pDesc').value = data.desc || '';
+                document.getElementById('pFeatures').value = data.features || '';
+                document.getElementById('pCare').value = data.care || '';
+                document.getElementById('pFit').value = data.fit || '';
+                if (data.img) {
+                    const prev = document.getElementById('productImagePreview');
+                    prev.src = data.img;
+                    prev.style.display = 'block';
+                    prev.closest('.file-zone').querySelector('.placeholder').style.display = 'none';
+                }
+            } else {
+                document.getElementById('productForm').reset();
+                document.getElementById('productImagePreview').style.display = 'none';
+                document.getElementById('productImagePreview').closest('.file-zone').querySelector('.placeholder')
+                    .style.display = 'block';
+                document.getElementById('pCategory').value = 'Clothing';
+            }
+            modal.classList.add('open');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.remove('open');
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const products = getProducts();
+            const editIdx = document.getElementById('editProductId').value;
+
+            const sizesStr = document.getElementById('pSizes').value;
+            const sizes = sizesStr ? sizesStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+            let img = '';
+            const preview = document.getElementById('productImagePreview');
+            if (preview.style.display !== 'none' && preview.src) img = preview.src;
+
+            const product = {
+                name: document.getElementById('pName').value.trim(),
+                brand: document.getElementById('pBrand').value.trim(),
+                category: document.getElementById('pCategory').value,
+                original: parseFloat(document.getElementById('pOriginal').value) || 0,
+                discounted: parseFloat(document.getElementById('pDiscounted').value) || 0,
+                material: document.getElementById('pMaterial').value.trim(),
+                color: document.getElementById('pColor').value.trim(),
+                colorHex: document.getElementById('pColorHex').value.trim() || '#cccccc',
+                sizes: sizes.length ? sizes : ['S', 'M', 'L'],
+                stock: document.getElementById('pStock').value,
+                desc: document.getElementById('pDesc').value.trim(),
+                features: document.getElementById('pFeatures').value.trim(),
+                care: document.getElementById('pCare').value.trim(),
+                fit: document.getElementById('pFit').value.trim(),
+                img: img || 'assets/placeholder.png'
+            };
+
+            if (editIdx !== '') {
+                const idx = parseInt(editIdx);
+                if (!isNaN(idx) && products[idx]) {
+                    products[idx] = { ...products[idx], ...product };
+                    toast('Product updated!');
+                }
+            } else {
+                product.id = Date.now() + Math.floor(Math.random() * 1000);
+                products.push(product);
+                toast('Product added!');
+            }
+
+            setProducts(products);
+            closeProductModal();
+            renderProducts();
+            updateStats();
+        }
+
+        function editProduct(idx) {
+            const products = getProducts();
+            if (products[idx]) {
+                const p = products[idx];
+                p._idx = idx;
+                openProductModal(p);
+            }
+        }
+
+        function deleteProduct(idx) {
+            if (!confirm('Delete this product permanently?')) return;
+            const products = getProducts();
+            products.splice(idx, 1);
+            setProducts(products);
+            renderProducts();
+            updateStats();
+            toast('Product deleted.', 'fa-trash');
+        }
+
+        document.getElementById('productImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const prev = document.getElementById('productImagePreview');
+                    prev.src = ev.target.result;
+                    prev.style.display = 'block';
+                    prev.closest('.file-zone').querySelector('.placeholder').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ================================================================
+        //  BANNERS
+        // ================================================================
+        function renderBanners() {
+            const banners = getBanners();
+            const grid = document.getElementById('bannerGrid');
+            if (!banners.length) {
+                grid.innerHTML =
+                    `<div style="grid-column:1/-1; text-align:center; color:#b8aa99; padding:2rem; background:white; border-radius:var(--radius);">No banners yet. Add your first hero banner!</div>`;
+                return;
+            }
+            grid.innerHTML = banners.map((b, i) => `
+                    <div class="banner-card">
+                        <img src="${b.img || 'assets/placeholder.png'}" onerror="this.src='assets/placeholder.png'" />
+                        <div class="info">
+                            <span class="index">#${i+1} ${i === 0 ? '⭐ First' : ''}</span>
+                            <div class="actions">
+                                ${i === 0 ? '<span class="active-badge"><i class="fas fa-check"></i> Active</span>' : ''}
+                                <button class="del" onclick="deleteBanner(${i})"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        function openBannerModal(editData = null) {
+            const modal = document.getElementById('bannerModal');
+            document.getElementById('bannerModalTitle').textContent = editData ? 'Edit Banner' : 'Add Hero Banner';
+            document.getElementById('editBannerIndex').value = editData ? editData._idx : '';
+            document.getElementById('bannerForm').reset();
+            document.getElementById('bannerImagePreview').style.display = 'none';
+            document.getElementById('bannerImagePreview').closest('.file-zone').querySelector('.placeholder')
+                .style.display = 'block';
+            if (editData && editData.img) {
+                const prev = document.getElementById('bannerImagePreview');
+                prev.src = editData.img;
+                prev.style.display = 'block';
+                prev.closest('.file-zone').querySelector('.placeholder').style.display = 'none';
+            }
+            modal.classList.add('open');
+        }
+
+        function closeBannerModal() {
+            document.getElementById('bannerModal').classList.remove('open');
+        }
+
+        function saveBanner(e) {
+            e.preventDefault();
+            const banners = getBanners();
+            const editIdx = document.getElementById('editBannerIndex').value;
+
+            let img = '';
+            const preview = document.getElementById('bannerImagePreview');
+            if (preview.style.display !== 'none' && preview.src) img = preview.src;
+
+            if (!img) { toast('Please upload a banner image.', 'fa-exclamation-circle'); return; }
+
+            const banner = { img };
+
+            if (editIdx !== '') {
+                const idx = parseInt(editIdx);
+                if (!isNaN(idx) && banners[idx]) {
+                    banners[idx] = { ...banners[idx], ...banner };
+                    toast('Banner updated!');
+                }
+            } else {
+                banners.push(banner);
+                toast('Banner added!');
+            }
+
+            setBanners(banners);
+            closeBannerModal();
+            renderBanners();
+            updateStats();
+        }
+
+        function deleteBanner(idx) {
+            if (!confirm('Remove this banner?')) return;
+            const banners = getBanners();
+            banners.splice(idx, 1);
+            setBanners(banners);
+            renderBanners();
+            updateStats();
+            toast('Banner removed.', 'fa-trash');
+        }
+
+        document.getElementById('bannerImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const prev = document.getElementById('bannerImagePreview');
+                    prev.src = ev.target.result;
+                    prev.style.display = 'block';
+                    prev.closest('.file-zone').querySelector('.placeholder').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ================================================================
+        //  LOGO
+        // ================================================================
+        function updateLogo() {
+            const logo = getLogo();
+            document.getElementById('currentLogo').src = logo;
+            document.getElementById('sideLogo').src = logo;
+            document.getElementById('loginLogo').src = logo;
+        }
+
+        document.getElementById('logoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const prev = document.getElementById('logoPreview');
+                    prev.src = ev.target.result;
+                    prev.style.display = 'block';
+                    prev.closest('.file-zone').querySelector('.placeholder').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function uploadLogo() {
+            const preview = document.getElementById('logoPreview');
+            if (preview.style.display !== 'none' && preview.src) {
+                setLogo(preview.src);
+                updateLogo();
+                toast('Logo updated!');
+            } else {
+                toast('Please select a logo image first.', 'fa-exclamation-circle');
+            }
+        }
+
+        // ================================================================
+        //  ORDERS
+        // ================================================================
+        function renderOrders() {
+            const orders = getOrders();
+            const tbody = document.getElementById('orderTable');
+
+            if (!orders || orders.length === 0) {
+                tbody.innerHTML =
+                    `<tr><td colspan="7" class="empty">No orders yet. Place an order from the store or click "Create Test Order" to generate one.</td></tr>`;
+                return;
+            }
+
+            const users = getUsers();
+            const sorted = [...orders].sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateB - dateA;
+            });
+
+            tbody.innerHTML = sorted.map((o) => {
+                const user = users.find(u => u.id === o.userId);
+                const customerName = user ? user.name : (o.customerName || 'Guest');
+
+                let itemsHtml = '';
+                if (o.items && Array.isArray(o.items) && o.items.length > 0) {
+                    const itemNames = o.items.map(i => {
+                        const name = i.name || i.productName || 'Product';
+                        const qty = i.qty || 1;
+                        return `<span class="item-tag">${name} <span class="qty-badge">${qty}</span></span>`;
+                    }).join(' ');
+                    itemsHtml = `<div class="order-items-list">${itemNames}</div>`;
+                } else {
+                    itemsHtml = '<span style="color:#b8aa99;">—</span>';
+                }
+
+                const status = o.status || 'Pending';
+                let statusClass = 'pending';
+                if (status === 'Delivered') statusClass = 'delivered';
+                else if (status === 'Processing') statusClass = 'processing';
+                else if (status === 'Cancelled') statusClass = 'cancelled';
+
+                let dateDisplay = '—';
+                if (o.date) {
+                    try {
+                        dateDisplay = new Date(o.date).toLocaleDateString('en-IN', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                        });
+                    } catch (e) { dateDisplay = '—'; }
+                }
+
+                return `
+                        <tr>
+                            <td><code style="background:#f5ede2; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:600;">#${String(o.id).slice(-8)}</code></td>
+                            <td><strong>${customerName}</strong></td>
+                            <td>${itemsHtml}</td>
+                            <td><strong style="color:#b45309;">₹${o.total || 0}</strong></td>
+                            <td><span class="status-badge ${statusClass}">${status}</span></td>
+                            <td style="font-size:0.75rem; color:#8a7c6e;">${dateDisplay}</td>
+                            <td>
+                                <button class="edit" onclick="toggleOrder('${o.id}')" style="border:none; padding:4px 12px; border-radius:30px; background:#fef6ec; cursor:pointer; font-size:0.7rem;">
+                                    <i class="fas fa-sync"></i> Toggle
+                                </button>
+                                <button class="del" onclick="deleteOrder('${o.id}')" style="border:none; padding:4px 12px; border-radius:30px; background:#fde8e8; cursor:pointer; font-size:0.7rem; color:#b02a37;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+            }).join('');
+        }
+
+        function refreshOrders() {
+            renderOrders();
+            updateStats();
+            toast('Orders refreshed!', 'fa-sync');
+        }
+
+        function toggleOrder(orderId) {
+            const orders = getOrders();
+            const idx = orders.findIndex(o => String(o.id) === String(orderId));
+            if (idx !== -1) {
+                const currentStatus = orders[idx].status || 'Pending';
+                const statusMap = {
+                    'Pending': 'Processing',
+                    'Processing': 'Delivered',
+                    'Delivered': 'Pending',
+                    'Cancelled': 'Pending'
+                };
+                orders[idx].status = statusMap[currentStatus] || 'Pending';
+                setOrders(orders);
+                renderOrders();
+                updateStats();
+                toast(`Order status → ${orders[idx].status}`);
+            }
+        }
+
+        function deleteOrder(orderId) {
+            if (!confirm('Delete this order permanently?')) return;
+            const orders = getOrders();
+            const filtered = orders.filter(o => String(o.id) !== String(orderId));
+            if (filtered.length < orders.length) {
+                setOrders(filtered);
+                renderOrders();
+                updateStats();
+                toast('Order deleted.', 'fa-trash');
+            }
+        }
+
+        // ================================================================
+        //  CREATE TEST ORDER
+        // ================================================================
+        function createTestOrder() {
+            const orders = getOrders();
+            const users = getUsers();
+
+            let testUser = users.find(u => u.email === 'test@pluto.com');
+            if (!testUser) {
+                testUser = {
+                    id: 'test_' + Date.now(),
+                    name: 'Test Customer',
+                    email: 'test@pluto.com',
+                    phone: '9876543210',
+                    membershipTier: 'FREE',
+                    rewardPoints: 50,
+                    createdAt: new Date().toISOString(),
+                    address: '123 Test Street, Mumbai',
+                    upiId: 'test@upi'
+                };
+                users.push(testUser);
+                localStorage.setItem('pluto_users', JSON.stringify(users));
+            }
+
+            const products = getProducts();
+            const sampleProducts = products.length > 0 ? products : DEFAULT_PRODUCTS;
+            const randomProduct = sampleProducts[Math.floor(Math.random() * sampleProducts.length)];
+
+            const newOrder = {
+                id: 'ORD-' + Date.now().toString().slice(-8),
+                userId: testUser.id,
+                customerName: testUser.name,
+                items: [{
+                    name: randomProduct.name || 'Sample Product',
+                    price: randomProduct.discounted || 999,
+                    qty: Math.floor(Math.random() * 3) + 1,
+                    img: randomProduct.img || 'assets/placeholder.png'
+                }],
+                total: (randomProduct.discounted || 999) * (Math.floor(Math.random() * 3) + 1),
+                date: new Date().toISOString(),
+                status: ['Pending', 'Processing', 'Delivered'][Math.floor(Math.random() * 3)],
+                shippingAddress: testUser.address || '123 Test Street, Mumbai',
+                upiId: testUser.upiId || 'test@upi'
+            };
+
+            orders.push(newOrder);
+            setOrders(orders);
+            renderOrders();
+            updateStats();
+            toast('✅ Test order created successfully!', 'fa-check-circle');
+        }
+
+        // ================================================================
+        //  USERS
+        // ================================================================
+        function renderUsers() {
+            const users = getUsers();
+            const tbody = document.getElementById('userTable');
+            if (!users.length) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty">No users registered yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td><strong>${u.name || 'N/A'}</strong></td>
+                        <td>${u.email || '-'}</td>
+                        <td>${u.phone || '-'}</td>
+                        <td><span class="badge ${u.membershipTier === 'EXCLUSIVE' ? 'badge-success' : u.membershipTier === 'PREMIUM' ? 'badge-warning' : ''}">${u.membershipTier || 'FREE'}</span></td>
+                        <td>${u.rewardPoints || 0}</td>
+                        <td style="font-size:0.75rem;">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td>
+                    </tr>
+                `).join('');
+        }
+
+        // ================================================================
+        //  AUTH
+        // ================================================================
+        const ADMIN_EMAIL = 'admin@pluto.com';
+        const ADMIN_PASSWORD = 'admin123';
+
+        function login(email, password) {
+            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('adminApp').style.display = 'flex';
+                document.getElementById('adminName').textContent = 'Admin';
+                document.getElementById('adminAvatar').textContent = 'A';
+                initAdmin();
+                return true;
+            }
+            return false;
+        }
+
+        function logout() {
+            if (confirm('Logout from admin panel?')) {
+                document.getElementById('adminApp').style.display = 'none';
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('loginEmail').value = ADMIN_EMAIL;
+                document.getElementById('loginPassword').value = ADMIN_PASSWORD;
+                document.getElementById('loginError').style.display = 'none';
+            }
+        }
+
+        function goStore() {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const pwd = document.getElementById('loginPassword').value.trim();
+            if (login(email, pwd)) {
+                document.getElementById('loginError').style.display = 'none';
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+        document.getElementById('loginEmail').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+
+        // ================================================================
+        //  INIT
+        // ================================================================
+        function initAdmin() {
+            // Seed defaults if empty
+            getProducts();
+            getBanners();
+            getLogo();
+
+            if (!localStorage.getItem('pluto_orders')) {
+                setOrders([]);
+            }
+
+            updateStats();
+            renderProducts();
+            renderBanners();
+            renderOrders();
+            renderUsers();
+            updateLogo();
+
+            document.getElementById('productModal').addEventListener('click', function(e) {
+                if (e.target === this) closeProductModal();
+            });
+            document.getElementById('bannerModal').addEventListener('click', function(e) {
+                if (e.target === this) closeBannerModal();
+            });
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'pluto_orders') {
+                    renderOrders();
+                    updateStats();
+                }
+                if (e.key === 'pluto_products' || e.key === 'pluto_banners' || e.key === 'pluto_logo') {
+                    if (e.key === 'pluto_products') renderProducts();
+                    if (e.key === 'pluto_banners') renderBanners();
+                    if (e.key === 'pluto_logo') updateLogo();
+                    updateStats();
+                }
+                if (e.key === 'pluto_users') {
+                    renderUsers();
+                    updateStats();
+                }
+            });
+
+            toast('Dashboard ready with all store products!', 'fa-crown');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('adminApp').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
